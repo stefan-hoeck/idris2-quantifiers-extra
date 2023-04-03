@@ -28,12 +28,4 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Build lib
-        run: pack install json
-      - name: Build docs
-        run: pack install json-docs
-      - name: Run test
-        run: pack run json-test -n 1000
-      - name: Build json-simple
-        run: pack install json-simple
-      - name: Test json-simple
-        run: pack test json-simple -n 1000
+        run: pack install quantifiers-extra
