@@ -1,0 +1,4 @@
+[custom.all.quantifiers-extra]
+type = "local"
+path = "."
+ipkg = "quantifiers-extra.ipkg"

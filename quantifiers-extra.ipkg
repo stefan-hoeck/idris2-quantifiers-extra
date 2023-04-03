@@ -1,0 +1,12 @@
+package quantifiers-extra
+
+authors    = "stefan-hoeck"
+brief      = "Some additions to `Data.List.Quantifires`"
+version    = 0.6.0
+readme     = "README.md"
+license    = "BSD-3 Clause"
+
+sourcedir  = "src"
+depends    = base    >= 0.6.0
+
+modules = Data.List.Quantifiers.Extra
