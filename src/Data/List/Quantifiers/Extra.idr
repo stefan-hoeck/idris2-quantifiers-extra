@@ -34,13 +34,18 @@ inject @{There _} v = There $ inject v
 
 ||| Tries to extract a value from a `Any f ts`.
 public export
-project : (prf : Has t ts) => Any f ts -> Maybe (f t)
-project @{Here}    (Here v)  = Just v
-project @{There p} (There v) = project @{p} v
-project _                    = Nothing
+project : (0 t : k) -> (prf : Has t ts) => Any f ts -> Maybe (f t)
+project t @{Here}    (Here v)  = Just v
+project t @{There p} (There v) = project t @{p} v
+project t _                    = Nothing
+
+||| Tries to extract a value from a `Any f ts`.
+public export %inline
+project' : (prf : Has t ts) => Any f ts -> Maybe (f t)
+project' = project t
 
 ||| Extracts the only possible value from a unary sum.
-public export
+public export %inline
 project1 : Any f [t] -> f t
 project1 (Here v)  = v
 project1 (There _) impossible
@@ -57,6 +62,71 @@ decomp @{Here}                       (Here v)  = Right v
 decomp @{Here}                       (There v) = Left $ v
 decomp @{There _} {ts = _ :: _ :: _} (Here v)  = Left $ Here v
 decomp @{There _} {ts = _ :: _ :: _} (There v) = mapFst There $ decomp v
+
+--------------------------------------------------------------------------------
+--          Heterogeneous maps and traversals
+--------------------------------------------------------------------------------
+
+namespace Any
+  public export %inline
+  hmap : ({0 v : k} -> f v -> g v) -> Any f ks -> Any g ks
+  hmap = mapProperty
+
+  public export
+  hzipWith :
+       ({0 v : k} -> f v -> g v -> h v)
+    -> All f ks
+    -> Any g ks
+    -> Any h ks
+  hzipWith fun (v :: vs) (Here x)  = Here (fun v x)
+  hzipWith fun (v :: vs) (There x) = There $ hzipWith fun vs x
+
+  public export
+  collapse : ({0 v : k} -> f v -> x) -> Any f ks -> x
+  collapse g (Here v)  = g v
+  collapse g (There v) = collapse g v
+
+  public export %inline
+  collapse' : Any (Prelude.const x) ks -> x
+  collapse' = collapse id
+
+  public export
+  hsequence : Applicative f => Any (f . g) ks -> f (Any g ks)
+  hsequence (Here x)  = Here <$> x
+  hsequence (There x) = There <$> hsequence x
+
+namespace All
+  public export %inline
+  hmap : ({0 v : k} -> f v -> g v) -> All f ks -> All g ks
+  hmap = mapProperty
+
+  public export
+  hzipWith :
+       ({0 v : k} -> f v -> g v -> h v)
+    -> All f ks
+    -> All g ks
+    -> All h ks
+  hzipWith fun (x :: xs) (y :: ys)  = fun x y :: hzipWith fun xs ys
+  hzipWith fun []        []         = []
+
+  public export
+  hpure : All (Prelude.const ()) ks => ({0 v : k} -> f v) -> All f ks
+  hpure @{[]}     fun = []
+  hpure @{_ :: _} fun = fun :: hpure fun
+
+  public export
+  hfoldl : ({0 v : k} -> acc -> f v -> acc) -> acc -> All f ks -> acc
+  hfoldl g x []        = x
+  hfoldl g x (y :: ys) = hfoldl g (g x y) ys
+
+  public export %inline
+  hfoldMap : Monoid m => ({0 v : k} -> f v -> m) -> All f ks -> m
+  hfoldMap g = hfoldl (\x,v => x <+> g v) neutral
+
+  public export
+  hsequence : Applicative f => All (f . g) ks -> f (All g ks)
+  hsequence []      = pure []
+  hsequence (x::xs) = [| x :: hsequence xs |]
 
 --------------------------------------------------------------------------------
 --          Implementations
