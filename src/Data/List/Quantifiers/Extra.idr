@@ -57,3 +57,52 @@ decomp @{Here}                       (Here v)  = Right v
 decomp @{Here}                       (There v) = Left $ v
 decomp @{There _} {ts = _ :: _ :: _} (Here v)  = Left $ Here v
 decomp @{There _} {ts = _ :: _ :: _} (There v) = mapFst There $ decomp v
+
+--------------------------------------------------------------------------------
+--          Implementations
+--------------------------------------------------------------------------------
+
+export
+All (Eq . p) xs => Eq (All p xs) where
+  (==)           [] []             = True
+  (==) @{_ :: _} (h1::t1) (h2::t2) = h1 == h2 && t1 == t2
+
+%hint
+allEq : All (Ord . p) xs => All (Eq . p) xs
+allEq @{[]}     = []
+allEq @{_ :: _} = %search :: allEq
+
+export
+All (Ord . p) xs => Ord (All p xs) where
+  compare            [] []            = EQ
+  compare @{_ :: _} (h1::t1) (h2::t2) = case compare h1 h2 of
+    EQ => compare t1 t2
+    o  => o
+
+export
+All (Eq . p) xs => Eq (Any p xs) where
+  (==) @{_ :: _} (Here x)  (Here y)  = x == y
+  (==) @{_ :: _} (There x) (There y) = x == y
+  (==) _ _ = False
+
+export
+All (Ord . p) xs => Ord (Any p xs) where
+  compare @{_ :: _} (Here x)  (Here y)  = compare x y
+  compare @{_ :: _} (There x) (There y) = compare x y
+  compare           (Here _)  (There _) = LT
+  compare           (There _) (Here _)  = GT
+
+export
+All (Semigroup . p) xs => Semigroup (All p xs) where
+  (<+>)           [] [] = []
+  (<+>) @{_ :: _} (h1::t1) (h2::t2) = (h1 <+> h2) :: (t1 <+> t2)
+
+%hint
+allSemigroup : All (Monoid . p) xs => All (Semigroup . p) xs
+allSemigroup @{[]}     = []
+allSemigroup @{_ :: _} = %search :: allSemigroup
+
+export
+All (Monoid . p) xs => Monoid (All p xs) where
+  neutral @{[]}   = []
+  neutral @{_::_} = neutral :: neutral
