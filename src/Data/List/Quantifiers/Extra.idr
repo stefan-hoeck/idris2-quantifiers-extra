@@ -27,7 +27,7 @@ public export
 (-) (y :: x :: xs) v @{There k} = y :: (-) (x :: xs) v
 
 ||| Inject a value into a `Any f ts`.
-public export %inline
+public export
 inject : (prf : Has t ts) => f t -> Any f ts
 inject @{Here}    v = Here v
 inject @{There _} v = There $ inject v
