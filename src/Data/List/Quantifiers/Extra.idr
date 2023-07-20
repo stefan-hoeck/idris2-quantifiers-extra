@@ -109,6 +109,14 @@ namespace All
   hzipWith fun (x :: xs) (y :: ys)  = fun x y :: hzipWith fun xs ys
   hzipWith fun []        []         = []
 
+  public export %inline
+  happly : All (\x => f x -> g x) ks -> Any f ks -> Any g ks
+  happly = hzipWith id
+
+  public export %inline
+  happly' : All (\x => f x -> t) ks -> Any f ks -> t
+  happly' fs = collapse' . happly fs
+
   public export
   hpure : All (Prelude.const ()) ks => ({0 v : k} -> f v) -> All f ks
   hpure @{[]}     fun = []
