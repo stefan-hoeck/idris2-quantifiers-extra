@@ -146,6 +146,11 @@ allEq @{[]}     = []
 allEq @{_ :: _} = %search :: allEq
 
 export
+(ps : All (Show . p) xs) => Show (Any p xs) where
+  showPrec {ps = _ :: _} p (Here v)  = showCon p "Here" (showArg v)
+  showPrec {ps = _ :: _} p (There v) = showCon p "There" (showArg v)
+
+export
 All (Eq . p) xs => Eq (Any p xs) where
   (==) @{_ :: _} (Here x)  (Here y)  = x == y
   (==) @{_ :: _} (There x) (There y) = x == y
