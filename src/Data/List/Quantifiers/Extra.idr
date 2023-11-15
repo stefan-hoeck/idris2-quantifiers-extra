@@ -127,6 +127,10 @@ namespace All
   hfill {ks = []}    g = []
   hfill {ks = v::vs} g = g v :: hfill g
 
+  public export %inline
+  hconst : {ks : _} -> t -> All (Prelude.const t) ks
+  hconst = hfill . const
+
   public export
   hpure : All (Prelude.const ()) ks => ({0 v : k} -> f v) -> All f ks
   hpure @{[]}     fun = []
