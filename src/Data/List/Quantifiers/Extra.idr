@@ -101,9 +101,9 @@ namespace All
   hmap = mapProperty
 
   public export %inline
-  hmapWith : {ks : _} -> ((v : k) -> f v -> g v) -> All f ks -> All g ks
-  hmapWith {ks = []}    _ []      = []
-  hmapWith {ks = v::vs} g (x::xs) = g v x :: hmapWith g xs
+  hmapW : {ks : _} -> ((v : k) -> f v -> g v) -> All f ks -> All g ks
+  hmapW {ks = []}    _ []      = []
+  hmapW {ks = v::vs} g (x::xs) = g v x :: hmapW g xs
 
   public export
   hzipWith :
@@ -113,6 +113,16 @@ namespace All
     -> All h ks
   hzipWith fun (x :: xs) (y :: ys)  = fun x y :: hzipWith fun xs ys
   hzipWith fun []        []         = []
+
+  public export
+  hzipWithW :
+       {ks : _}
+    -> ((v : k) -> f v -> g v -> h v)
+    -> All f ks
+    -> All g ks
+    -> All h ks
+  hzipWithW {ks = v::vs} fun (x :: xs) (y :: ys)  = fun v x y :: hzipWithW fun xs ys
+  hzipWithW {ks = []}    fun []        []         = []
 
   public export %inline
   happly : All (\x => f x -> g x) ks -> Any f ks -> Any g ks
