@@ -100,6 +100,11 @@ namespace All
   hmap : ({0 v : k} -> f v -> g v) -> All f ks -> All g ks
   hmap = mapProperty
 
+  public export %inline
+  hmapWith : {ks : _} -> ((v : k) -> f v -> g v) -> All f ks -> All g ks
+  hmapWith {ks = []}    _ []      = []
+  hmapWith {ks = v::vs} g (x::xs) = g v x :: hmapWith g xs
+
   public export
   hzipWith :
        ({0 v : k} -> f v -> g v -> h v)
@@ -116,6 +121,11 @@ namespace All
   public export %inline
   happly' : All (\x => f x -> t) ks -> Any f ks -> t
   happly' fs = collapse' . happly fs
+
+  public export
+  hfill : {ks : _} -> ((v : k) -> f v) -> All f ks
+  hfill {ks = []}    g = []
+  hfill {ks = v::vs} g = g v :: hfill g
 
   public export
   hpure : All (Prelude.const ()) ks => ({0 v : k} -> f v) -> All f ks
