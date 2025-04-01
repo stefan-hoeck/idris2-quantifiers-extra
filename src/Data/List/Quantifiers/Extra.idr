@@ -32,6 +32,12 @@ inject : (prf : Has t ts) => f t -> Any f ts
 inject @{Here}    v = Here v
 inject @{There _} v = There $ inject v
 
+||| Injects a heterogeneous sum into a larger one.
+public export
+widen : All (`Has` ts) ss => Any f ss -> Any f ts
+widen @{_::_} (Here v)  = inject v
+widen @{_::_} (There v) = widen v
+
 ||| Tries to extract a value from a `Any f ts`.
 public export
 project : (0 t : k) -> (prf : Has t ts) => Any f ts -> Maybe (f t)
