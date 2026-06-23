@@ -107,11 +107,11 @@ namespace Any
   hsequence (There x) = There <$> hsequence x
 
   export
-  replace : (h : Has t ts) => f s -> Any f ts -> Any f (Replaced ts h s)
-  replace @{Here}    v (Here x)  = Here v
-  replace @{Here}    v (There x) = There x
-  replace @{There p} v (Here x)  = Here x
-  replace @{There p} v (There x) = There $ replace v x
+  replace : (h : Has t ts) -> f s -> Any f ts -> Any f (Replaced ts h s)
+  replace Here      v (Here x)  = Here v
+  replace Here      v (There x) = There x
+  replace (There p) v (Here x)  = Here x
+  replace (There p) v (There x) = There $ replace p v x
 
   export
   update : (h : Has t ts) => (f t -> f s) -> Any f ts -> Any f (Replaced ts h s)
@@ -186,9 +186,9 @@ namespace All
   hsequence (x::xs) = [| x :: hsequence xs |]
 
   export
-  replace : (h : Has t ts) => f s -> All f ts -> All f (Replaced ts h s)
-  replace @{Here}    v (x::xs) = v :: xs
-  replace @{There p} v (x::xs) = x :: replace v xs
+  replace : (h : Has t ts) -> f s -> All f ts -> All f (Replaced ts h s)
+  replace Here      v (x::xs) = v :: xs
+  replace (There p) v (x::xs) = x :: replace p v xs
 
   export
   update : (h : Has t ts) => (f t -> f s) -> All f ts -> All f (Replaced ts h s)
