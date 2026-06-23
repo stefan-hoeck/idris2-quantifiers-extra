@@ -74,13 +74,6 @@ Replaced : (vs : List a) -> Elem v vs -> (w : a) -> List a
 Replaced (x :: xs) Here      w = w :: xs
 Replaced (x :: xs) (There p) w = x :: Replaced xs p w
 
-export
-replace : (h : Has t ts) => (f t -> f s) -> Any f ts -> Any f (Replaced ts h s)
-replace @{Here}    fun (Here x)  = Here (fun x)
-replace @{Here}    fun (There x) = There x
-replace @{There p} fun (Here x)  = Here x
-replace @{There p} fun (There x) = There $ replace fun x
-
 --------------------------------------------------------------------------------
 --          Heterogeneous maps and traversals
 --------------------------------------------------------------------------------
@@ -112,6 +105,13 @@ namespace Any
   hsequence : Applicative f => Any (f . g) ks -> f (Any g ks)
   hsequence (Here x)  = Here <$> x
   hsequence (There x) = There <$> hsequence x
+
+  export
+  replace : (h : Has t ts) => (f t -> f s) -> Any f ts -> Any f (Replaced ts h s)
+  replace @{Here}    fun (Here x)  = Here (fun x)
+  replace @{Here}    fun (There x) = There x
+  replace @{There p} fun (Here x)  = Here x
+  replace @{There p} fun (There x) = There $ replace fun x
 
 namespace All
   public export %inline
@@ -177,6 +177,11 @@ namespace All
   hsequence : Applicative f => All (f . g) ks -> f (All g ks)
   hsequence []      = pure []
   hsequence (x::xs) = [| x :: hsequence xs |]
+
+  export
+  replace : (h : Has t ts) => (f t -> f s) -> All f ts -> All f (Replaced ts h s)
+  replace @{Here}    fun (x::xs) = fun x :: xs
+  replace @{There p} fun (x::xs) = x :: replace fun xs
 
 --------------------------------------------------------------------------------
 --          Implementations
