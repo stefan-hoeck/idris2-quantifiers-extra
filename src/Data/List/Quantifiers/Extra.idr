@@ -69,6 +69,18 @@ decomp @{Here}                       (There v) = Left $ v
 decomp @{There _} {ts = _ :: _ :: _} (Here v)  = Left $ Here v
 decomp @{There _} {ts = _ :: _ :: _} (There v) = mapFst There $ decomp v
 
+public export
+Replaced : (vs : List a) -> Elem v vs -> (w : a) -> List a
+Replaced (x :: xs) Here      w = w :: xs
+Replaced (x :: xs) (There p) w = x :: Replaced xs p w
+
+export
+replace : (h : Has t ts) => (f t -> f s) -> Any f ts -> Any f (Replaced ts h s)
+replace @{Here}    fun (Here x)  = Here (fun x)
+replace @{Here}    fun (There x) = There x
+replace @{There p} fun (Here x)  = Here x
+replace @{There p} fun (There x) = There $ replace fun x
+
 --------------------------------------------------------------------------------
 --          Heterogeneous maps and traversals
 --------------------------------------------------------------------------------
