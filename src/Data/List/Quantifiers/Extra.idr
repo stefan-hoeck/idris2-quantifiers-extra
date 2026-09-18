@@ -210,3 +210,7 @@ All (Ord . p) xs => Ord (Any p xs) where
   compare @{_ :: _} (There x) (There y) = compare x y
   compare           (Here _)  (There _) = LT
   compare           (There _) (Here _)  = GT
+
+export
+(prf : All (Interpolation . p) xs) => Interpolation (Any p xs) where
+  interpolate v = collapse' $ hzipWith (\_ => interpolate) prf v
